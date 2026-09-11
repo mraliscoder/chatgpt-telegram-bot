@@ -12,11 +12,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY bot ./bot
 
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 RUN useradd --create-home --uid 10001 botuser \
     && mkdir -p /data \
-    && chown -R botuser:botuser /data /app
-USER botuser
+    && chown -R botuser:botuser /data /app \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
 
 VOLUME ["/data"]
 
+# Starts as root only to chown the data volume, then runs as botuser.
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["python", "-m", "bot.main"]
